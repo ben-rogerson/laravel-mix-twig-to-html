@@ -23,18 +23,37 @@ class TwigToHtml {
                 fileBase: undefined,
                 twigOptions: null,
                 enabled: true,
+                publicFolder: null,
             },
             config
         )
     }
 
+    criticalStyleFile(filePath, publicFolder) {
+        if (!filePath || !publicFolder || !mix.inProduction()) return;
+        const fs = require('fs');
+        const criticalCss = (() => {
+            try {
+                return fs.readFileSync(path.join(publicFolder, filePath), 'utf8');
+            } catch (error) {
+                return '';
+            }
+        })();
+        if (!criticalCss) return;
+        return `<style>${criticalCss}</style>`;
+    }
+
     webpackRules() {
         if (!this.config.enabled) return
 
-        const options = Object.assign(
-            { autoescape: true },
+        const options = Object.assign({
+            autoescape: true,
+            functions: {},
+        },
             this.config.twigOptions
         )
+
+        options.functions.criticalStyleFile = filePath => this.criticalStyleFile(filePath, this.config.publicFolder)
 
         return {
             test: /\.twig$/,
@@ -61,9 +80,9 @@ class TwigToHtml {
             const isSubPath = this.config.fileBase !== path.dirname(file)
             const prefixPath = isSubPath
                 ? path
-                      .dirname(file)
-                      .split(path.sep)
-                      .pop()
+                    .dirname(file)
+                    .split(path.sep)
+                    .pop()
                 : ""
             const newFileName = `${path.basename(
                 file,
