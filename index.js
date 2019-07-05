@@ -23,24 +23,9 @@ class TwigToHtml {
                 fileBase: undefined,
                 twigOptions: null,
                 enabled: true,
-                publicFolder: null,
             },
             config
         )
-    }
-
-    criticalStyleFile(filePath, publicFolder) {
-        if (!filePath || !publicFolder || !mix.inProduction()) return;
-        const fs = require('fs');
-        const criticalCss = (() => {
-            try {
-                return fs.readFileSync(path.join(publicFolder, filePath), 'utf8');
-            } catch (error) {
-                return '';
-            }
-        })();
-        if (!criticalCss) return;
-        return `<style>${criticalCss}</style>`;
     }
 
     webpackRules() {
@@ -52,8 +37,6 @@ class TwigToHtml {
         },
             this.config.twigOptions
         )
-
-        options.functions.criticalStyleFile = filePath => this.criticalStyleFile(filePath, this.config.publicFolder)
 
         return {
             test: /\.twig$/,
