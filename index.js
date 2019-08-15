@@ -20,6 +20,7 @@ class TwigToHtml {
     this.config = Object.assign(
       {
         files: [],
+        fileOptions: {},
         fileBase: undefined,
         twigOptions: null,
         enabled: true
@@ -59,7 +60,7 @@ class TwigToHtml {
 
     const normaliseFileConfig = files =>
       typeof files[0] === 'string'
-        ? globby.sync(files).map(file => ({ template: file }))
+        ? globby.sync(files).map(file => ({ template: file, ...this.config.fileOptions }))
         : typeof files[0] === 'object'
         ? Object.values(files).reduce((prev, fileConfig) => {
             const paths = globby.sync(fileConfig.template).map(file => ({
