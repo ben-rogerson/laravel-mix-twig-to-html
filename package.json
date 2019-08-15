@@ -13,8 +13,19 @@
   "keywords": [],
   "author": "Ben Rogerson <info@benrogerson.com.au> (https://benrogerson.com.au)",
   "license": "MIT",
+  "prettier": {
+    "singleQuote": true,
+    "semi": true
+  },
   "bugs": {
     "url": "https://github.com/ben-rogerson/laravel-mix-twig-to-html/issues"
   },
-  "homepage": "https://github.com/ben-rogerson/laravel-mix-twig-to-html#readme"
+  "homepage": "https://github.com/ben-rogerson/laravel-mix-twig-to-html#readme",
+  "dependencies": {
+    "globby": "^10.0.1"
+  },
+  "peerDependencies": {
+    "laravel-mix": "^4.0.0"
+  },
+  "devDependencies": {}
 }
