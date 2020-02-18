@@ -1,5 +1,5 @@
 const mix = require("laravel-mix");
-const { dirname, join, sep } = require("path");
+const { dirname, basename, extname, join, sep } = require("path");
 
 const assign = Object.assign;
 
@@ -24,6 +24,8 @@ class TwigToHtml {
         files: [],
         fileBase: undefined,
         twigOptions: null,
+        htmlOptions: null,
+        htmlWebpack: null,
         enabled: true
       },
       config
@@ -41,30 +43,29 @@ class TwigToHtml {
       this.config.twigOptions
     );
 
-    const htmlOptions = assign(
-      {
-        attrs: [
-          ":srcset",
-          "img:src",
-          "audio:src",
-          "video:src",
-          "video:poster",
-          "track:src",
-          "embed:src",
-          "source:src",
-          "input:src",
-          "object:data"
-        ]
-      },
-      this.config.htmlOptions
-    );
-
     return {
       test: /\.twig$/,
       use: [
         {
           loader: "html-loader",
-          options: htmlOptions
+          options: assign(
+            {
+              minify: mix.inProduction(),
+              attrs: [
+                ":srcset",
+                "img:src",
+                "audio:src",
+                "video:src",
+                "video:poster",
+                "track:src",
+                "embed:src",
+                "source:src",
+                "input:src",
+                "object:data"
+              ]
+            },
+            this.config.htmlOptions
+          )
         },
         {
           loader: "twig-html-loader",
@@ -85,12 +86,12 @@ class TwigToHtml {
         ? sync(files).map(file => ({ template: file }))
         : typeof files[0] === "object"
         ? Object.values(files).reduce((prev, fileConfig) => {
-          const paths = sync(fileConfig.template).map(file => ({
-            ...fileConfig,
-            template: file
-          }));
-          return prev.concat(paths);
-        }, [])
+            const paths = sync(fileConfig.template).map(file => ({
+              ...fileConfig,
+              template: file
+            }));
+            return prev.concat(paths);
+          }, [])
         : [];
 
     const removeUnderscorePaths = config =>
@@ -107,14 +108,13 @@ class TwigToHtml {
         const isSubPath = this.config.fileBase !== dirname(item.template);
         const prefixPath = isSubPath
           ? dirname(item.template)
-            .split(sep)
-            .pop()
+              .split(sep)
+              .pop()
           : "";
-        const newFileName = `${dirname(
+        const newFileName = `${basename(
           item.template,
-          dirname(item.template)
+          extname(item.template)
         )}.html`;
-
         return {
           ...item,
           filename: join(prefixPath, newFileName)
